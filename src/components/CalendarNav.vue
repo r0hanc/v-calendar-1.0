@@ -11,6 +11,7 @@
         :tabindex="prevItemsEnabled ? 0 : undefined"
         @click="movePrev"
         @keydown="e => onSpaceOrEnter(e, movePrev)"
+        aria-label="Previous Year"
       >
         <slot name="nav-left-button">
           <svg-icon name="left-arrow" width="20px" height="24px" />
@@ -35,6 +36,7 @@
         :tabindex="nextItemsEnabled ? 0 : undefined"
         @click="moveNext"
         @keydown="e => onSpaceOrEnter(e, moveNext)"
+        aria-label="Next Year"
       >
         <slot name="nav-right-button">
           <svg-icon name="right-arrow" width="20px" height="24px" />
@@ -193,7 +195,7 @@ export default {
           year,
           id: `${year}.${pad(month, 2)}`,
           label: this.locale.format(d, this.masks.navMonths),
-          ariaLabel: this.locale.format(d, 'MMMM YYYY'),
+          ariaLabel: this.masks.navMonths + ' ' + this.year,
           isActive: month === this.month && year === this.year,
           isCurrent: month === thisMonth && year === thisYear,
           isDisabled: !this.validator({ month, year }),
@@ -216,7 +218,7 @@ export default {
           year,
           id: year,
           label: year,
-          ariaLabel: year,
+          ariaLabel: 'Year ' + year,
           isActive: year === this.year,
           isCurrent: year === thisYear,
           isDisabled: !enabled,
