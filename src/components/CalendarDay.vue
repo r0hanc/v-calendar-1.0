@@ -192,7 +192,7 @@ export default {
         tabindex,
         'aria-label': this.day.ariaLabel,
         'aria-disabled': this.day.isDisabled ? 'true' : 'false',
-        'aria-hidden': this.day.isDisabled ? 'true' : 'false',
+        'aria-hidden': !this.inMonth ? 'true' : 'false',
         role: 'button',
       };
     },

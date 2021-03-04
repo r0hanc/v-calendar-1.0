@@ -26,7 +26,7 @@
         @click="toggleMode"
         @keydown="e => onSpaceOrEnter(e, toggleMode)"
       >
-        {{ title }}
+        <span class="srOnly">Year&nbsp;</span> {{ title }}
       </span>
       <!--Move next button-->
       <span
@@ -195,7 +195,7 @@ export default {
           year,
           id: `${year}.${pad(month, 2)}`,
           label: this.locale.format(d, this.masks.navMonths),
-          ariaLabel: this.masks.navMonths + ' ' + this.year,
+          ariaLabel: this.locale.format(d, 'MMMM') + ' ' + this.title,
           isActive: month === this.month && year === this.year,
           isCurrent: month === thisMonth && year === thisYear,
           isDisabled: !this.validator({ month, year }),
@@ -404,5 +404,15 @@ export default {
       border-color: var(--accent-400);
     }
   }
+}
+
+.srOnly {
+  clip: rect(0 0 0 0); 
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap; 
+  width: 1px;
 }
 </style>
