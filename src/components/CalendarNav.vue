@@ -195,7 +195,7 @@ export default {
           year,
           id: `${year}.${pad(month, 2)}`,
           label: this.locale.format(d, this.masks.navMonths),
-          ariaLabel: this.locale.format(d, 'MMMM') + ' ' + this.title,
+          ariaLabel: `${this.locale.format(d, 'MMMM')} . ' ' . ${this.title}`,
           isActive: month === this.month && year === this.year,
           isCurrent: month === thisMonth && year === thisYear,
           isDisabled: !this.validator({ month, year }),
@@ -218,7 +218,7 @@ export default {
           year,
           id: year,
           label: year,
-          ariaLabel: 'Year ' + year,
+          ariaLabel: `'Year ' . ${year}`,
           isActive: year === this.year,
           isCurrent: year === thisYear,
           isDisabled: !enabled,
@@ -407,12 +407,12 @@ export default {
 }
 
 .srOnly {
-  clip: rect(0 0 0 0); 
+  clip: rect(0 0 0 0);
   clip-path: inset(50%);
   height: 1px;
   overflow: hidden;
   position: absolute;
-  white-space: nowrap; 
+  white-space: nowrap;
   width: 1px;
 }
 </style>
