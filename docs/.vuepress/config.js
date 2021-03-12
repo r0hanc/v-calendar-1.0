@@ -107,7 +107,7 @@ module.exports = {
         {
           title: 'Getting Started',
           collapsable: false,
-          children: ['installation', 'custom-defaults', 'vue-3'],
+          children: ['installation', 'custom-defaults'],
         },
         {
           title: 'Core Concepts',

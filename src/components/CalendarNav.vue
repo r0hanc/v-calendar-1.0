@@ -11,7 +11,6 @@
         :tabindex="prevItemsEnabled ? 0 : undefined"
         @click="movePrev"
         @keydown="e => onSpaceOrEnter(e, movePrev)"
-        aria-label="Previous Year"
       >
         <slot name="nav-left-button">
           <svg-icon name="left-arrow" width="20px" height="24px" />
@@ -26,7 +25,7 @@
         @click="toggleMode"
         @keydown="e => onSpaceOrEnter(e, toggleMode)"
       >
-        <span class="srOnly">Year&nbsp;</span> {{ title }}
+        {{ title }}
       </span>
       <!--Move next button-->
       <span
@@ -36,7 +35,6 @@
         :tabindex="nextItemsEnabled ? 0 : undefined"
         @click="moveNext"
         @keydown="e => onSpaceOrEnter(e, moveNext)"
-        aria-label="Next Year"
       >
         <slot name="nav-right-button">
           <svg-icon name="right-arrow" width="20px" height="24px" />
@@ -195,7 +193,7 @@ export default {
           year,
           id: `${year}.${pad(month, 2)}`,
           label: this.locale.format(d, this.masks.navMonths),
-          ariaLabel: `${this.locale.format(d, 'MMMM')} . ' ' . ${this.title}`,
+          ariaLabel: this.locale.format(d, 'MMMM YYYY'),
           isActive: month === this.month && year === this.year,
           isCurrent: month === thisMonth && year === thisYear,
           isDisabled: !this.validator({ month, year }),
@@ -218,7 +216,7 @@ export default {
           year,
           id: year,
           label: year,
-          ariaLabel: `'Year ' . ${year}`,
+          ariaLabel: year,
           isActive: year === this.year,
           isCurrent: year === thisYear,
           isDisabled: !enabled,
@@ -404,15 +402,5 @@ export default {
       border-color: var(--accent-400);
     }
   }
-}
-
-.srOnly {
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  height: 1px;
-  overflow: hidden;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
 }
 </style>

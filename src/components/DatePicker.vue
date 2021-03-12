@@ -12,14 +12,13 @@ import {
   on,
   off,
 } from '../utils/helpers';
-import { isObject, isArray } from '../utils/_';
+import { isObject, isArray, pick } from '../utils/_';
 import {
   showPopover as sp,
   hidePopover as hp,
   togglePopover as tp,
   getPopoverTriggerEvents,
 } from '../utils/popovers';
-import { PATCH } from '../utils/locale';
 
 const _dateConfig = {
   type: 'auto',
@@ -30,15 +29,27 @@ const _dateConfig = {
 const _rangeConfig = {
   start: {
     ..._dateConfig,
+    timeAdjust: '00:00:00',
   },
   end: {
     ..._dateConfig,
+    timeAdjust: '23:59:59',
   },
+};
+
+const PATCH_KEYS = {
+  1: ['year', 'month', 'day', 'hours', 'minutes', 'seconds'],
+  2: ['year', 'month', 'day'],
+  3: ['hours', 'minutes', 'seconds'],
 };
 
 const MODE_DATE = 'date';
 const MODE_DATE_TIME = 'datetime';
 const MODE_TIME = 'time';
+
+const PATCH_DATE_TIME = 1;
+const PATCH_DATE = 2;
+const PATCH_TIME = 3;
 
 export default {
   name: 'DatePicker',
@@ -57,9 +68,8 @@ export default {
               is24hr: this.is24hr,
               minuteIncrement: this.minuteIncrement,
               showBorder: !this.isTime,
-              isDisabled: this.isDateTime && !dp.isValid,
             },
-            on: { input: p => this.onTimeInput(p, idx === 0) },
+            on: { input: p => this.onTimeInput(p, idx) },
           }),
         ),
         this.$scopedSlots.footer && this.$scopedSlots.footer(),
@@ -186,21 +196,6 @@ export default {
     isDragging() {
       return !!this.dragValue;
     },
-    modelConfig_() {
-      if (this.isRange) {
-        return {
-          start: {
-            ..._rangeConfig.start,
-            ...(this.modelConfig.start || this.modelConfig),
-          },
-          end: {
-            ..._rangeConfig.end,
-            ...(this.modelConfig.end || this.modelConfig),
-          },
-        };
-      }
-      return { ..._dateConfig, ...this.modelConfig };
-    },
     inputMask() {
       const masks = this.$locale.masks;
       if (this.isTime) {
@@ -211,21 +206,12 @@ export default {
       }
       return this.$locale.masks.input;
     },
-    inputMaskHasTime() {
-      return /[Hh]/g.test(this.inputMask);
-    },
-    inputMaskHasDate() {
-      return /[dD]{1,2}|Do|W{1,4}|M{1,4}|YY(?:YY)?/g.test(this.inputMask);
-    },
-    inputMaskPatch() {
-      if (this.inputMaskHasTime && this.inputMaskHasDate) {
-        return PATCH.DATE_TIME;
-      }
-      if (this.inputMaskHasDate) return PATCH.DATE;
-      if (this.inputMaskHasTime) return PATCH.TIME;
-      return undefined;
-    },
     slotArgs() {
+      const inputConfig = {
+        type: 'string',
+        mask: this.inputMask,
+        patch: PATCH_DATE_TIME,
+      };
       const {
         isRange,
         isDragging,
@@ -241,8 +227,8 @@ export default {
           }
         : this.inputValues[0];
       const events = [true, false].map(isStart => ({
-        input: this.onInputInput(isStart),
-        change: this.onInputChange(isStart),
+        input: this.onInputInput(inputConfig, isStart),
+        change: this.onInputChange(inputConfig, isStart),
         keyup: this.onInputKeyup,
         ...getPopoverTriggerEvents({
           ...this.popover_,
@@ -321,10 +307,16 @@ export default {
     inputMask() {
       this.formatInput();
     },
+    isRange: {
+      immediate: true,
+      handler() {
+        this.initDateConfig();
+      },
+    },
     value() {
       if (!this.watchValue) return;
       this.forceUpdateValue(this.value, {
-        config: this.modelConfig_,
+        config: this.modelConfig,
         notify: false,
         formatInput: true,
         hidePopover: false,
@@ -337,13 +329,14 @@ export default {
       this.refreshDateParts();
     },
     timezone() {
+      this.initDateConfig();
       this.refreshDateParts();
       this.forceUpdateValue(this.value_, { notify: true, formatInput: true });
     },
   },
   created() {
     this.forceUpdateValue(this.value, {
-      config: this.modelConfig_,
+      config: this.modelConfig,
       notify: false,
       formatInput: true,
       hidePopover: false,
@@ -369,6 +362,24 @@ export default {
     });
   },
   methods: {
+    initDateConfig() {
+      let config;
+      if (this.isRange) {
+        config = {
+          start: {
+            ..._rangeConfig.start,
+            ...(this.modelConfig.start || this.modelConfig),
+          },
+          end: {
+            ..._rangeConfig.end,
+            ...(this.modelConfig.end || this.modelConfig),
+          },
+        };
+      } else {
+        config = { ..._dateConfig, ...this.modelConfig };
+      }
+      this.dateConfig = config;
+    },
     getDateParts(date) {
       return this.$locale.getDateParts(date);
     },
@@ -425,7 +436,7 @@ export default {
     handleDayClick(day) {
       const { keepVisibleOnInput, visibility } = this.popover_;
       const opts = {
-        patch: PATCH.DATE,
+        patch: PATCH_DATE,
         adjustTime: true,
         formatInput: true,
         hidePopover:
@@ -449,60 +460,63 @@ export default {
       if (!this.isDragging) return;
       this.dragTrackingValue.end = day.date;
       this.updateValue(this.dragTrackingValue, {
-        patch: PATCH.DATE,
+        patch: PATCH_DATE,
         adjustTime: true,
-        formatInput: true,
-        hidePopover: false,
       });
     },
-    onTimeInput(parts, isStart) {
-      let value = null;
+    onTimeInput(parts, idx) {
+      const opts = {
+        config: { type: 'object' },
+        patch: PATCH_TIME,
+      };
       if (this.isRange) {
-        const start = isStart ? parts : this.dateParts[0];
-        const end = isStart ? this.dateParts[1] : parts;
-        value = { start, end };
+        const start = idx === 0 ? parts : this.dateParts[0];
+        const end = idx === 0 ? this.dateParts[1] : parts;
+        this.updateValue({ start, end }, opts);
       } else {
-        value = parts;
+        this.updateValue(parts, opts);
       }
-      this.updateValue(value, { patch: PATCH.TIME }).then(() =>
-        this.adjustPageRange(isStart),
-      );
     },
-    onInputInput(isStart) {
+    onInputInput(config, isStart) {
       return e => {
         if (!this.updateOnInput_) return;
-        this.onInputUpdate(e.target.value, isStart, {
+        let inputValue = e.target.value;
+        this.inputValues.splice(isStart ? 0 : 1, 1, inputValue);
+        if (this.isRange) {
+          inputValue = {
+            start: this.inputValues[0],
+            end: this.inputValues[1] || this.inputValues[0],
+          };
+        }
+        this.updateValue(inputValue, {
+          config,
+          patch: PATCH_DATE_TIME,
           formatInput: false,
           hidePopover: false,
           debounce: this.inputDebounce_,
+        }).then(() => {
+          this.adjustPageRange(isStart);
         });
       };
     },
-    onInputChange(isStart) {
+    onInputChange(config, isStart) {
       return e => {
-        this.onInputUpdate(e.target.value, isStart, {
+        const inputValue = e.target.value;
+        this.inputValues.splice(isStart ? 0 : 1, 1, inputValue);
+        const value = this.isRange
+          ? {
+              start: this.inputValues[0],
+              end: this.inputValues[1] || this.inputValues[0],
+            }
+          : inputValue;
+        this.updateValue(value, {
+          config,
           formatInput: true,
           hidePopover: false,
+        }).then(() => {
+          this.adjustPageRange(isStart);
         });
       };
-    },
-    onInputUpdate(inputValue, isStart, opts) {
-      this.inputValues.splice(isStart ? 0 : 1, 1, inputValue);
-      const value = this.isRange
-        ? {
-            start: this.inputValues[0],
-            end: this.inputValues[1] || this.inputValues[0],
-          }
-        : inputValue;
-      const config = {
-        type: 'string',
-        mask: this.inputMask,
-      };
-      this.updateValue(value, {
-        ...opts,
-        config,
-        patch: this.inputMaskPatch,
-      }).then(() => this.adjustPageRange(isStart));
     },
     onInputShow(isStart) {
       this.adjustPageRange(isStart);
@@ -533,8 +547,8 @@ export default {
     forceUpdateValue(
       value,
       {
-        config = this.modelConfig_,
-        patch = PATCH.DATE_TIME,
+        config = this.dateConfig,
+        patch = PATCH_DATE_TIME,
         notify = true,
         clearIfEqual = false,
         formatInput = true,
@@ -548,7 +562,7 @@ export default {
         value,
         config,
         patch,
-        !isDragging,
+        isDragging,
       );
 
       // Reset to previous value if it was cleared but is required
@@ -590,7 +604,10 @@ export default {
       // 4. Denormalization/Notification
       if (notify && valueChanged) {
         // 4A. Denormalization
-        const denormalizedValue = this.denormalizeValue(normalizedValue);
+        const denormalizedValue = this.denormalizeValue(
+          normalizedValue,
+          this.dateConfig,
+        );
         // 4B. Notification
         const event = this.isDragging ? 'drag' : 'input';
         this.watchValue = false;
@@ -610,34 +627,34 @@ export default {
       }
       return !!value;
     },
-    normalizeValue(value, config, patch, sortRange) {
+    normalizeValue(value, config, patch, isDragging) {
       if (!this.hasValue(value)) return null;
+      const patchKeys = PATCH_KEYS[patch];
       if (this.isRange) {
-        const result = {};
-        const startFillDate =
-          (this.value_ && this.value_.start) ||
-          this.modelConfig_.start.fillDate;
-        const startConfig = config.start || config;
-        result.start = this.normalizeDate(value.start, {
-          ...startConfig,
-          fillDate: startFillDate,
-          patch,
-        });
-        const endFillDate =
-          (this.value_ && this.value_.end) || this.modelConfig_.end.fillDate;
-        const endConfig = config.end || config;
-        result.end = this.normalizeDate(value.end, {
-          ...endConfig,
-          fillDate: endFillDate,
-          patch,
-        });
-        return sortRange ? this.sortRange(result) : result;
+        const start = this.normalizeDate(value.start, config.start || config);
+        const end = this.normalizeDate(value.end, config.end || config);
+        const result = this.sortRange({ start, end });
+        if (patch !== PATCH_DATE_TIME) {
+          const startParts = {
+            ...this.dateParts[0],
+            ...pick(this.getDateParts(result.start), patchKeys),
+          };
+          result.start = this.getDateFromParts(startParts);
+          const endParts = {
+            ...this.dateParts[1],
+            ...pick(this.getDateParts(result.end), patchKeys),
+          };
+          result.end = this.getDateFromParts(endParts);
+        }
+        return isDragging ? result : this.sortRange(result);
       }
-      return this.normalizeDate(value, {
-        ...config,
-        fillDate: this.value_ || this.modelConfig_.fillDate,
-        patch,
-      });
+      let result = this.normalizeDate(value, config);
+      if (patch === PATCH_DATE_TIME) return result;
+      result = {
+        ...this.dateParts[0],
+        ...pick(this.getDateParts(result), patchKeys),
+      };
+      return this.getDateFromParts(result);
     },
     adjustTimeForValue(value, config) {
       if (!this.hasValue(value)) return null;
@@ -659,7 +676,7 @@ export default {
       }
       return { start, end };
     },
-    denormalizeValue(value, config = this.modelConfig_) {
+    denormalizeValue(value, config) {
       if (this.isRange) {
         if (!this.hasValue(value)) return null;
         return {
@@ -709,24 +726,17 @@ export default {
     showPopover(opts = {}) {
       sp({
         ref: this.$el,
-        ...this.popover_,
         ...opts,
         isInteractive: true,
         id: this.datePickerPopoverId,
       });
     },
     hidePopover(opts = {}) {
-      hp({
-        hideDelay: 10,
-        ...this.popover_,
-        ...opts,
-        id: this.datePickerPopoverId,
-      });
+      hp({ hideDelay: 10, ...opts, id: this.datePickerPopoverId });
     },
     togglePopover(opts) {
       tp({
         ref: this.$el,
-        ...this.popover_,
         ...opts,
         isInteractive: true,
         id: this.datePickerPopoverId,

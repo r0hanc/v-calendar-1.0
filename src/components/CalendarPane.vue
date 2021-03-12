@@ -72,7 +72,6 @@ export default {
       [header, weeks],
     );
   },
-  inheritAttrs: false,
   props: {
     page: Object,
     position: Number,

@@ -2,18 +2,16 @@
   {
     "props": {
       "mode": "datetime",
-      "value": "2021-01-15T04:15:00.000Z",
+      "value": "2021-01-15T04:15:00Z",
       "modelConfig": {
         "type": "string",
         "mask": "iso"
       },
       "timezone": "utc"
     },
-    "time": {
-      "hours": 4,
-      "minutes": 15,
-      "isAM": true
-    },
+    "hours": 4,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
     "newValue": "2021-01-30T04:15:00.000Z"
   },
@@ -27,31 +25,27 @@
       },
       "timezone": "utc"
     },
-    "time": {
-      "hours": 4,
-      "minutes": 15,
-      "isAM": true
-    },
+    "hours": 4,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
     "newValue": "2021-01-30T04:15:00.123Z"
   },
   {
     "props": {
       "mode": "datetime",
-      "value": "2021-01-15T04:15:00.000Z",
+      "value": "2021-01-15T04:15:00Z",
       "modelConfig": {
         "type": "string",
-        "mask": "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        "mask": "YYYY-MM-DDTHH:mm:ssZ"
       },
       "timezone": "utc"
     },
-    "time": {
-      "hours": 4,
-      "minutes": 15,
-      "isAM": true
-    },
+    "hours": 4,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
-    "newValue": "2021-01-30T04:15:00.000Z"
+    "newValue": "2021-01-30T04:15:00Z"
   },
   {
     "props": {
@@ -63,11 +57,9 @@
       },
       "timezone": "Europe/Kiev"
     },
-    "time": {
-      "hours": 6,
-      "minutes": 15,
-      "isAM": true
-    },
+    "hours": 6,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
     "newValue": "2021-01-30T04:15:00.000Z"
   },
@@ -81,11 +73,9 @@
       },
       "timezone": "Europe/Kiev"
     },
-    "time": {
-      "hours": 6,
-      "minutes": 15,
-      "isAM": true
-    },
+    "hours": 6,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
     "newValue": "2021-01-30T04:15:00.123Z"
   },
@@ -99,26 +89,9 @@
       },
       "timezone": "Europe/Kiev"
     },
-    "time": {
-      "hours": 6,
-      "minutes": 15,
-      "isAM": true
-    },
-    "clickEl": ".id-2021-01-30 .vc-day-content",
-    "newValue": "2021-01-30T04:15:00Z"
-  },
-  {
-    "props": {
-      "mode": "date",
-      "value": null,
-      "fromPage": { "month": 1, "year": 2021},
-      "modelConfig": {
-        "type": "string",
-        "mask": "YYYY-MM-DDTHH:mm:ssZ",
-        "fillDate": "2021-01-15T04:15:00Z"
-      },
-      "timezone": "utc"
-    },
+    "hours": 6,
+    "minutes": 15,
+    "isAM": true,
     "clickEl": ".id-2021-01-30 .vc-day-content",
     "newValue": "2021-01-30T04:15:00Z"
   }

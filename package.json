@@ -1,6 +1,6 @@
 {
-  "name": "v-calendar-1.0",
-  "version": "2.2.14",
+  "name": "v-calendar",
+  "version": "2.2.3",
   "private": false,
   "description": "A clean and extendable plugin for building simple attributed calendars in Vue.js.",
   "author": "Nathan Reyes <nathanreyes@me.com>",
@@ -76,6 +76,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/r0hanc/v-calendar-1.0"
+    "url": "https://github.com/nathanreyes/v-calendar"
   }
 }
