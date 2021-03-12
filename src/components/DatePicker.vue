@@ -483,10 +483,7 @@ export default {
         let inputValue = e.target.value;
         this.inputValues.splice(isStart ? 0 : 1, 1, inputValue);
         if (this.isRange) {
-          inputValue = {
-            start: this.inputValues[0],
-            end: this.inputValues[1] || this.inputValues[0],
-          };
+          inputValue = { start: this.inputValues[0], end: this.inputValues[1] };
         }
         this.updateValue(inputValue, {
           config,
@@ -504,10 +501,7 @@ export default {
         const inputValue = e.target.value;
         this.inputValues.splice(isStart ? 0 : 1, 1, inputValue);
         const value = this.isRange
-          ? {
-              start: this.inputValues[0],
-              end: this.inputValues[1] || this.inputValues[0],
-            }
+          ? { start: this.inputValues[0], end: this.inputValues[1] }
           : inputValue;
         this.updateValue(value, {
           config,
@@ -576,7 +570,10 @@ export default {
       }
 
       // 2. Validation (date or range)
-      const isDisabled = this.valueIsDisabled(normalizedValue);
+      const isDisabled =
+        this.hasValue(normalizedValue) &&
+        this.disabledAttribute &&
+        this.disabledAttribute.intersectsDate(normalizedValue);
       if (isDisabled) {
         if (isDragging) return;
         normalizedValue = this.value_;
@@ -698,13 +695,6 @@ export default {
         return datesAreEqual(a.start, b.start) && datesAreEqual(a.end, b.end);
       }
       return datesAreEqual(a, b);
-    },
-    valueIsDisabled(value) {
-      return (
-        this.hasValue(value) &&
-        this.disabledAttribute &&
-        this.disabledAttribute.intersectsDate(value)
-      );
     },
     formatInput() {
       this.$nextTick(() => {
