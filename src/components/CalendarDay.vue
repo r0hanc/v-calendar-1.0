@@ -186,13 +186,12 @@ export default {
       if (this.day.isFocusable) {
         tabindex = '0';
       } else if (this.day.inMonth) {
-        tabindex = '0';
+        tabindex = '-1';
       }
       return {
         tabindex,
         'aria-label': this.day.ariaLabel,
         'aria-disabled': this.day.isDisabled ? 'true' : 'false',
-        'aria-hidden': !this.inMonth ? 'true' : 'false',
         role: 'button',
       };
     },

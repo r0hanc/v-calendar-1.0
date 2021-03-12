@@ -80,9 +80,7 @@ export default {
             { 'is-disabled': isDisabled },
           ],
           attrs: {
-            role: 'button',
-            tabindex: '0',
-            'aria-label': isPrev ? 'Previous Month' : 'Next Month',
+            role: 'button'
           },
           on: {
             click,
